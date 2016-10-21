@@ -1,32 +1,52 @@
 var path = require('path');
-var options = [
+var options = 
   {
     title: "Basic Notification",
     body: "Short message part"
-  },
-  {
-    title: "Content-Image Notification",
-    body: "Short message plus a custom content image",
-    icon: path.join(__dirname, 'icon.png')
-  }
-]
+  };
 
-function doNotify(evt) {
-  if (evt.srcElement.id == "basic") {
-    new Notification(options[0].title, options[0]);
-  }
-  else if (evt.srcElement.id == "image") {
-    new Notification(options[1].title, options[1]);
-  }
+var percentageTicker = 0;
+var secondTicker = 0;
+var percentageTickAmount = 0;
+var max = 60 * 60;
+
+var progressBar = document.getElementById("timerProgress");
+var minutesInput = document.getElementById("inputMinutes");
+
+function notify() {
+    new Notification(options.title, options);
+    timeChanged();
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-  document.getElementById("basic").addEventListener("click", doNotify);
-  document.getElementById("image").addEventListener("click", doNotify);
-});
+function timeChanged(){
+    percentageTicker = 0;
+    secondTicker = 0;
+    max = parseInt(minutesInput.value) * 60;
+    percentageTickAmount = 100 / max;
+
+    if(isNaN(max)){
+        return;
+    }
+
+    updateProgressBar();
+}
 
 function updateSecond(){
-    console.log("second");
+    percentageTicker += percentageTickAmount;
+    ++secondTicker;
+
+    if(percentageTicker > 100){
+        notify();
+    }
+    else{
+        updateProgressBar();
+    }
 }
 
+function updateProgressBar(){
+    progressBar.setAttribute("aria-valuenow", percentageTicker);
+    progressBar.style.width = percentageTicker + "%";
+}
+
+//Set the timer going for every second.
 setInterval(updateSecond, 1000);
